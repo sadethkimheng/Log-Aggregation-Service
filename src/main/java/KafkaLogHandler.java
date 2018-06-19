@@ -13,18 +13,13 @@ public class KafkaLogHandler extends Handler {
 
 
 
-
-
     public void publish(LogRecord logRecord) {
 
-        List<String> handler = new ArrayList<String>();
+         List<String> handler = new ArrayList<String>();
 
-        handler.add(logRecord.getLevel() + ":");
-        handler.add(logRecord.getMillis()+ "@");
-        handler.add(logRecord.getSourceClassName() + "*");
-        handler.add(logRecord.getSourceMethodName() + "&");
-        handler.add("<" + logRecord.getMessage() + ">");
-        handler.add("\n");
+
+        handler.add(logRecord.getLevel() + ":" + logRecord.getMillis() + "*" + logRecord.getSourceClassName() + "&" + logRecord.getSourceMethodName() + " <" + logRecord.getMessage() + ">");
+
 
         System.out.println(handler);
 
@@ -39,13 +34,15 @@ public class KafkaLogHandler extends Handler {
         properties.setProperty("acks", "1");
         properties.setProperty("retries", "3");
         properties.setProperty("linger.ms", "1");
-        Producer<String, String> producer = new org.apache.kafka.clients.producer.KafkaProducer<String, String>(properties);
-        for (String str : handler) {
 
-            ProducerRecord<String, String> productRecord = new ProducerRecord<String, String>("testing1", "3", str);
+
+        Producer<String, String> producer = new org.apache.kafka.clients.producer.KafkaProducer<String, String>(properties);
+
+
+            String res = String.join(",", handler);
+            ProducerRecord<String, String> productRecord = new ProducerRecord<String, String>("testing1", "3", res);
             producer.send(productRecord);
 
-        }
         producer.close();
 
 

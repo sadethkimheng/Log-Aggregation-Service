@@ -10,7 +10,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="int-kafka-log-handler" target="1.5" />
+      <module name="int-kafka-log-handler" target="8" />
     </bytecodeTargetLevel>
   </component>
 </project>

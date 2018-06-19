@@ -14,8 +14,6 @@ public class test {
         logger.addHandler(new KafkaLogHandler());
         logger.info("Logging Info");
         logger.info("Logging Info");
-        logger.info("Logging Info");
-        logger.warning("Logging Info");
 
 
 
