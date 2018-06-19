@@ -13,11 +13,11 @@ public class KafkaLogHandler extends Handler {
 
 
 
-    public static List<String> handler = new ArrayList<String>();
 
 
     public void publish(LogRecord logRecord) {
 
+        List<String> handler = new ArrayList<String>();
 
         handler.add(logRecord.getLevel() + ":");
         handler.add(logRecord.getMillis()+ "@");
@@ -26,7 +26,7 @@ public class KafkaLogHandler extends Handler {
         handler.add("<" + logRecord.getMessage() + ">");
         handler.add("\n");
 
-        System.out.print(handler);
+        System.out.println(handler);
 
         Properties properties = new Properties();
 
@@ -34,7 +34,6 @@ public class KafkaLogHandler extends Handler {
         properties.setProperty("bootstrap.servers", "127.0.0.1:9092");
         properties.setProperty("key.serializer", StringSerializer.class.getName());
         properties.setProperty("value.serializer", StringSerializer.class.getName());
-
 
         // producer acks
         properties.setProperty("acks", "1");
