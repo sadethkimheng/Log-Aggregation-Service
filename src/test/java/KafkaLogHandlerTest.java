@@ -11,7 +11,7 @@ public class KafkaLogHandlerTest {
         Logger logger = LogManager.getLogManager().getLogger("");
         LogManager.getLogManager().reset();
 
-        logger.addHandler(new KafkaLogHandler());
+        logger.addHandler(new InstanceKafka());
 
         logger.info("Logging Info");
 
