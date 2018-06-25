@@ -21,7 +21,6 @@ public class KafkaLogHandler extends Handler{
     InetAddress addr ;
     String ipAddress;
     String hostname;
-    InstanceKafka ik = new InstanceKafka();
     {
         try {
             addr = InetAddress.getLocalHost();
@@ -38,6 +37,7 @@ public class KafkaLogHandler extends Handler{
     public void publish(LogRecord record) {
 
 
+        InstanceKafka ik = new InstanceKafka();
 
         ik.setAddr(addr);
         ik.setHostname(hostname);
@@ -53,13 +53,9 @@ public class KafkaLogHandler extends Handler{
         // JSON file
 
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("HostName", addr.getHostName());
-        map.put("HostAddress", addr.getHostAddress());
-        map.put("Logger", record);
         String json = null;
         try {
-            json = mapper.writeValueAsString(map);
+            json = mapper.writeValueAsString(ik);
 
         } catch (JsonProcessingException e) {
             e.printStackTrace();
@@ -75,9 +71,9 @@ public class KafkaLogHandler extends Handler{
         properties.setProperty("value.serializer", StringSerializer.class.getName());
 
 
-        Producer<String, String > producer = new org.apache.kafka.clients.producer.KafkaProducer<String, String>(properties);
+        Producer<String, Object > producer = new org.apache.kafka.clients.producer.KafkaProducer<String, Object>(properties);
 
-        ProducerRecord<String,String > productRecord = new ProducerRecord<>("testing1","3",json);
+        ProducerRecord<String,Object > productRecord = new ProducerRecord<String, Object>("testing1","3",json);
 
         producer.send(productRecord);
 
