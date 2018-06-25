@@ -12,32 +12,45 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Handler;
+import java.util.logging.LogRecord;
 
 
 public class KafkaLogHandler extends Handler{
 
-    InetAddress addr;
+
+    InetAddress addr ;
     String ipAddress;
     String hostname;
-
+    InstanceKafka ik = new InstanceKafka();
     {
         try {
             addr = InetAddress.getLocalHost();
             ipAddress = addr.getHostAddress();
             hostname = addr.getHostName();
-            System.out.println(ipAddress);
-            System.out.println(addr.getHostName());
-
 
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
-
     }
 
-    @Override
-    public void publish(java.util.logging.LogRecord record) {
 
+    @Override
+    public void publish(LogRecord record) {
+
+
+
+        ik.setAddr(addr);
+        ik.setHostname(hostname);
+        ik.setIpAddress(ipAddress);
+        ik.setRecord(record);
+
+
+        System.out.print(ik.getHostname());
+        System.out.print(ik.getIpAddress());
+        System.out.print(ik.getRecord());
+
+
+        // JSON file
 
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> map = new HashMap<String, Object>();
