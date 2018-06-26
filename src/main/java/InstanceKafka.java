@@ -12,6 +12,8 @@ public class InstanceKafka  {
     String ipAddress;
     String hostname;
     LogRecord record;
+    String IP;
+
 
     public InetAddress getAddr() {
         return addr;
@@ -44,7 +46,15 @@ public class InstanceKafka  {
     public void setRecord(LogRecord record) {
         this.record = record;
     }
+    public String getIP() {
+        return IP;
+    }
+
+    public void setIP(String IP) {
+        this.IP = IP;
+    }
 
 
 }
+
 
