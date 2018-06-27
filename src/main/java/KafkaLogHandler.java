@@ -18,48 +18,79 @@ public class KafkaLogHandler extends Handler{
     InetAddress addr ;
     String ipAddress;
     String hostname;
-    String IP = null;
+    static String IP = "";
+    String json = null;
+    InstanceKafka ik = new InstanceKafka();
+    ObjectMapper mapper = new ObjectMapper();
+    NetworkInterface e;
+    Enumeration<NetworkInterface> n;
+    Enumeration<InetAddress> a;
+    InetAddress addrr;
+    Properties properties = new Properties();
+    Producer<String, Object > producer;
+    ProducerRecord<String,Object > productRecord;
 
 
+
+
+    public void NetworkInterface (){
+
+        try {
+            n = NetworkInterface.getNetworkInterfaces();
+            while (n.hasMoreElements())
+            {
+                e = n.nextElement();
+                a = e.getInetAddresses();
+                while (a.hasMoreElements())
+                {
+
+                    addrr = a.nextElement();
+                    if (!addrr.isLoopbackAddress() && addrr.isSiteLocalAddress()) {
+                        IP = addrr.getHostAddress();
+
+                    }
+
+                }
+
+
+            }
+
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+
+        }
+
+
+    }
 
     @Override
     public void publish(LogRecord record)  {
 
-
-            try {
-                Enumeration<NetworkInterface> n = NetworkInterface.getNetworkInterfaces();
-                while (n.hasMoreElements())
-                {
-                    NetworkInterface e = n.nextElement();
-                    System.out.println("Interface: " + e.getName());
-                    Enumeration<InetAddress> a = e.getInetAddresses();
-                    while (a.hasMoreElements())
-                   {
-
-                        InetAddress addr = a.nextElement();
-                        System.out.println(addr.getHostAddress() + "\n");
-                        if (!addr.isLoopbackAddress() && addr.isSiteLocalAddress()) {
-                            IP = addr.getHostAddress();
-                        }
-
-                    }
+        if(IP == null || IP == "")
+        {
+            NetworkInterface();
+        }
 
 
-                }
+        // JSON file
 
-            }
-            catch (Exception e)
-            {
+        try {
+            json = mapper.writeValueAsString(ik);
 
-            }
-
-
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
         {
             try {
                 addr = InetAddress.getLocalHost();
                 ipAddress = addr.getHostAddress();
                 hostname = addr.getHostName();
 
+                ik.setHostname(hostname);
+                ik.setRecord(record);
+                ik.setIP(IP);
 
 
             } catch (UnknownHostException e) {
@@ -67,36 +98,13 @@ public class KafkaLogHandler extends Handler{
             }
         }
 
+        KafakaProducer();
 
 
-        InstanceKafka ik = new InstanceKafka();
-
-        ik.setHostname(hostname);
-        ik.setRecord(record);
-        ik.setIP(IP);
+    }
 
 
-
-        System.out.println(ik.getHostname());
-        System.out.println(ik.getRecord());
-        System.out.println(ik.getIP());
-
-
-
-
-        // JSON file
-
-        ObjectMapper mapper = new ObjectMapper();
-        String json = null;
-        try {
-            json = mapper.writeValueAsString(ik);
-
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-
-        Properties properties = new Properties();
+    public void KafakaProducer (){
 
         //kafka bootstrap server
 
@@ -105,18 +113,15 @@ public class KafkaLogHandler extends Handler{
         properties.setProperty("value.serializer", StringSerializer.class.getName());
 
 
-        Producer<String, Object > producer = new org.apache.kafka.clients.producer.KafkaProducer<String, Object>(properties);
+        producer = new org.apache.kafka.clients.producer.KafkaProducer<String, Object>(properties);
 
-        ProducerRecord<String,Object > productRecord = new ProducerRecord<String, Object>("testing1","3",json);
+        productRecord = new ProducerRecord<String, Object>("testing2","3",json);
 
         producer.send(productRecord);
 
         producer.close();
 
-
     }
-
-
 
     @Override
     public void flush() {
@@ -133,5 +138,3 @@ public class KafkaLogHandler extends Handler{
 
 
 }
-
-

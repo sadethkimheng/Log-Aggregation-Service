@@ -13,8 +13,10 @@ public class KafkaLogHandlerTest {
 
         logger.addHandler(new KafkaLogHandler());
 
-        logger.info("Logging Info");
-
+        for(int i=0;i<=1000;i++)
+            {
+                logger.info("Logging Info");
+            }
     }
 
 }
