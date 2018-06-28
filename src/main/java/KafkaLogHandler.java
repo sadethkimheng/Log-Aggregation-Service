@@ -13,6 +13,7 @@ import java.util.logging.LogRecord;
 
 
 
+
 public class KafkaLogHandler extends Handler{
 
 
@@ -22,46 +23,38 @@ public class KafkaLogHandler extends Handler{
     String IP = "";
     String json = null;
     InstanceKafka ik = new InstanceKafka();
+    ObjectMapper mapper = new ObjectMapper();
     ProducerRecord<String,Object >  productRecord;
+    Producer<String, Object > producer;
 
 
 
 
-    public void NetworkInterface (){
+    public void NetworkInterface () {
 
-        long start = System.currentTimeMillis();
         try {
             Enumeration<NetworkInterface> n = NetworkInterface.getNetworkInterfaces();
-            while (n.hasMoreElements())
-            {
+            while (n.hasMoreElements()) {
                 NetworkInterface e = n.nextElement();
                 Enumeration<InetAddress> a = e.getInetAddresses();
-                while (a.hasMoreElements())
-                {
+                while (a.hasMoreElements()) {
 
                     InetAddress addrr = a.nextElement();
-                    if (!addrr.isLoopbackAddress() && addrr.isSiteLocalAddress())
-                    {
+                    if (!addrr.isLoopbackAddress() && addrr.isSiteLocalAddress()) {
                         IP = addrr.getHostAddress();
                     }
 
                 }
             }
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             e.printStackTrace();
 
         }
 
-        long end = System.currentTimeMillis();
-        System.out.println("Counting From NetworkInterface takes " + (end - start) + "ms");
     }
 
     @Override
     public void publish(LogRecord record) {
-
-        long start = System.currentTimeMillis();
 
         if (IP == null || IP == "") {
             NetworkInterface();
@@ -75,7 +68,6 @@ public class KafkaLogHandler extends Handler{
             ik.setHostname(hostname);
             ik.setRecord(record);
             ik.setIP(IP);
-            ObjectMapper mapper = new ObjectMapper();
             json = mapper.writeValueAsString(ik);
 
 
@@ -91,34 +83,27 @@ public class KafkaLogHandler extends Handler{
             KafakaProducer();
 
         }
+        producer.send(productRecord);
+        producer.flush();
 
-        long end = System.currentTimeMillis();
-        System.out.println("Counting Publish takes " + (end - start) + "ms");
+
+
+
 
 
     }
-
-
-
     public void KafakaProducer (){
 
 //        kafka bootstrap server
-        long start = System.currentTimeMillis();
-
         Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", "127.0.0.1:9092");
         properties.setProperty("key.serializer", StringSerializer.class.getName());
         properties.setProperty("value.serializer", StringSerializer.class.getName());
 
 
-        Producer<String, Object > producer = new org.apache.kafka.clients.producer.KafkaProducer<String, Object>(properties);
+        producer = new org.apache.kafka.clients.producer.KafkaProducer<String, Object>(properties);
 
         productRecord = new ProducerRecord<String, Object>("testing2","3",json);
-
-        producer.send(productRecord);
-        producer.close();
-        long end = System.currentTimeMillis();
-        System.out.println("Counting Productreord takes 1" + (end - start) + "ms");
 
     }
 
@@ -131,7 +116,6 @@ public class KafkaLogHandler extends Handler{
     public void close() throws SecurityException {
 
     }
-
 
 
 
