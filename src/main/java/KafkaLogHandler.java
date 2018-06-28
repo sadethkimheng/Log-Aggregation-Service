@@ -18,7 +18,6 @@ public class KafkaLogHandler extends Handler{
 
 
     InetAddress addr ;
-    String ipAddress;
     String hostname;
     String IP = "";
     String json = null;
@@ -33,6 +32,7 @@ public class KafkaLogHandler extends Handler{
     public void NetworkInterface () {
 
         try {
+
             Enumeration<NetworkInterface> n = NetworkInterface.getNetworkInterfaces();
             while (n.hasMoreElements()) {
                 NetworkInterface e = n.nextElement();
@@ -62,7 +62,6 @@ public class KafkaLogHandler extends Handler{
 
         try {
             addr = InetAddress.getLocalHost();
-            ipAddress = addr.getHostAddress();
             hostname = addr.getHostName();
 
             ik.setHostname(hostname);
@@ -71,9 +70,7 @@ public class KafkaLogHandler extends Handler{
             json = mapper.writeValueAsString(ik);
 
 
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -83,6 +80,7 @@ public class KafkaLogHandler extends Handler{
             KafakaProducer();
 
         }
+        productRecord = new ProducerRecord<String, Object>("testing2","3",json);
         producer.send(productRecord);
         producer.flush();
 
@@ -102,8 +100,6 @@ public class KafkaLogHandler extends Handler{
 
 
         producer = new org.apache.kafka.clients.producer.KafkaProducer<String, Object>(properties);
-
-        productRecord = new ProducerRecord<String, Object>("testing2","3",json);
 
     }
 

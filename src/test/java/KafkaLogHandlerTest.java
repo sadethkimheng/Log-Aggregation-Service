@@ -15,7 +15,6 @@ public class KafkaLogHandlerTest {
         logger.addHandler(new KafkaLogHandler());
 
 
-        for(int i =0;i<=10;i++)
             logger.info("Logging Info");
 
         long end = System.currentTimeMillis();
