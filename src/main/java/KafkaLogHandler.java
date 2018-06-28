@@ -12,49 +12,41 @@ import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
 
+
 public class KafkaLogHandler extends Handler{
 
 
     InetAddress addr ;
     String ipAddress;
     String hostname;
-    static String IP = "";
+    String IP = "";
     String json = null;
     InstanceKafka ik = new InstanceKafka();
-    ObjectMapper mapper = new ObjectMapper();
-    NetworkInterface e;
-    Enumeration<NetworkInterface> n;
-    Enumeration<InetAddress> a;
-    InetAddress addrr;
-    Properties properties = new Properties();
-    Producer<String, Object > producer;
-    ProducerRecord<String,Object > productRecord;
+    ProducerRecord<String,Object >  productRecord;
 
 
 
 
     public void NetworkInterface (){
 
+        long start = System.currentTimeMillis();
         try {
-            n = NetworkInterface.getNetworkInterfaces();
+            Enumeration<NetworkInterface> n = NetworkInterface.getNetworkInterfaces();
             while (n.hasMoreElements())
             {
-                e = n.nextElement();
-                a = e.getInetAddresses();
+                NetworkInterface e = n.nextElement();
+                Enumeration<InetAddress> a = e.getInetAddresses();
                 while (a.hasMoreElements())
                 {
 
-                    addrr = a.nextElement();
-                    if (!addrr.isLoopbackAddress() && addrr.isSiteLocalAddress()) {
+                    InetAddress addrr = a.nextElement();
+                    if (!addrr.isLoopbackAddress() && addrr.isSiteLocalAddress())
+                    {
                         IP = addrr.getHostAddress();
-
                     }
 
                 }
-
-
             }
-
         }
         catch (Exception e)
         {
@@ -62,64 +54,71 @@ public class KafkaLogHandler extends Handler{
 
         }
 
-
+        long end = System.currentTimeMillis();
+        System.out.println("Counting From NetworkInterface takes " + (end - start) + "ms");
     }
 
     @Override
-    public void publish(LogRecord record)  {
+    public void publish(LogRecord record) {
 
-        if(IP == null || IP == "")
-        {
+        long start = System.currentTimeMillis();
+
+        if (IP == null || IP == "") {
             NetworkInterface();
         }
 
-
-        // JSON file
-
         try {
+            addr = InetAddress.getLocalHost();
+            ipAddress = addr.getHostAddress();
+            hostname = addr.getHostName();
+
+            ik.setHostname(hostname);
+            ik.setRecord(record);
+            ik.setIP(IP);
+            ObjectMapper mapper = new ObjectMapper();
             json = mapper.writeValueAsString(ik);
 
+
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
-        {
-            try {
-                addr = InetAddress.getLocalHost();
-                ipAddress = addr.getHostAddress();
-                hostname = addr.getHostName();
-
-                ik.setHostname(hostname);
-                ik.setRecord(record);
-                ik.setIP(IP);
 
 
-            } catch (UnknownHostException e) {
-                e.printStackTrace();
-            }
+        if (productRecord == null) {
+
+            KafakaProducer();
+
         }
 
-        KafakaProducer();
+        long end = System.currentTimeMillis();
+        System.out.println("Counting Publish takes " + (end - start) + "ms");
 
 
     }
+
 
 
     public void KafakaProducer (){
 
-        //kafka bootstrap server
+//        kafka bootstrap server
+        long start = System.currentTimeMillis();
 
+        Properties properties = new Properties();
         properties.setProperty("bootstrap.servers", "127.0.0.1:9092");
         properties.setProperty("key.serializer", StringSerializer.class.getName());
         properties.setProperty("value.serializer", StringSerializer.class.getName());
 
 
-        producer = new org.apache.kafka.clients.producer.KafkaProducer<String, Object>(properties);
+        Producer<String, Object > producer = new org.apache.kafka.clients.producer.KafkaProducer<String, Object>(properties);
 
         productRecord = new ProducerRecord<String, Object>("testing2","3",json);
 
         producer.send(productRecord);
-
         producer.close();
+        long end = System.currentTimeMillis();
+        System.out.println("Counting Productreord takes 1" + (end - start) + "ms");
 
     }
 
