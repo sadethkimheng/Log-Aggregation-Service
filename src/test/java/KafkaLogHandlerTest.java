@@ -16,6 +16,7 @@ public class KafkaLogHandlerTest {
 
 
             logger.info("Logging Info");
+        
 
         long end = System.currentTimeMillis();
         System.out.println("Counting KafkaLogHandler takes 1" + (end - start) + "ms");
