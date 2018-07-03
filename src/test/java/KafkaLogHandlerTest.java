@@ -1,3 +1,4 @@
+import org.apache.kafka.common.utils.KafkaThread;
 import org.junit.Test;
 
 import java.util.logging.LogManager;
@@ -8,18 +9,17 @@ public class KafkaLogHandlerTest {
 
     @Test
     public void publish() {
-        long start = System.currentTimeMillis();
+//        long start = System.currentTimeMillis();
         Logger logger = LogManager.getLogManager().getLogger("");
         LogManager.getLogManager().reset();
 
         logger.addHandler(new KafkaLogHandler());
+        logger.info("Logging Info");
+        logger.info("Logging Info");
 
-
-            logger.info("Logging Info");
-        
-
+//        logger.info("Logging Info");
         long end = System.currentTimeMillis();
-        System.out.println("Counting KafkaLogHandler takes 1" + (end - start) + "ms");
+//        System.out.println("Counting KafkaLogHandler takes 1" + (end - start) + "ms");
 
 
 

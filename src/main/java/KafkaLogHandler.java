@@ -13,13 +13,15 @@ import java.util.logging.LogRecord;
 
 
 
-public class KafkaLogHandler extends Handler{
+public class KafkaLogHandler extends Handler {
 
 
     InetAddress addr ;
     String hostname;
     String IP = "";
     Producer<String, Object > producer;
+    String json = null;
+    Properties properties = new Properties();
 
 
 
@@ -45,17 +47,16 @@ public class KafkaLogHandler extends Handler{
             e.printStackTrace();
 
         }
-        Properties properties = new Properties();
+
         properties.setProperty("bootstrap.servers", "127.0.0.1:9092");
         properties.setProperty("key.serializer", StringSerializer.class.getName());
         properties.setProperty("value.serializer", StringSerializer.class.getName());
         producer = new org.apache.kafka.clients.producer.KafkaProducer<String, Object>(properties);
+
     }
 
     @Override
     public void publish(LogRecord record) {
-
-        String json = null;
 
         try {
             addr = InetAddress.getLocalHost();
@@ -65,24 +66,17 @@ public class KafkaLogHandler extends Handler{
             ik.setRecord(record);
             ik.setIP(IP);
             ObjectMapper mapper = new ObjectMapper();
-
             json = mapper.writeValueAsString(ik);
 
 
         } catch (Exception e) {
             e.printStackTrace();
         }
+        Thread n1 = new Thread(new ThreadKafka(producer,json));
 
-            KafakaProducer(json);
+        n1.start();
 
-    }
 
-    public void KafakaProducer (String json) {
-
-//        kafka bootstrap server
-        ProducerRecord<String,Object >  productRecord = new ProducerRecord<String, Object>("testing2","3",json);
-            producer.send(productRecord);
-            producer.flush();
 
     }
 
@@ -95,7 +89,6 @@ public class KafkaLogHandler extends Handler{
     public void close() throws SecurityException {
 
     }
-
 
 
 
