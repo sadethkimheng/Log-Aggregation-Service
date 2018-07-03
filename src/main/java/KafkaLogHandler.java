@@ -21,13 +21,18 @@ public class KafkaLogHandler extends Handler {
     String IP = "";
     Producer<String, Object > producer;
     String json = null;
-    Properties properties = new Properties();
 
 
 
 
 
     public KafkaLogHandler(){
+        Properties properties = new Properties();
+        properties.setProperty("bootstrap.servers", "127.0.0.1:9092");
+        properties.setProperty("key.serializer", StringSerializer.class.getName());
+        properties.setProperty("value.serializer", StringSerializer.class.getName());
+        producer = new org.apache.kafka.clients.producer.KafkaProducer<String, Object>(properties);
+
         try {
 
             Enumeration<NetworkInterface> n = NetworkInterface.getNetworkInterfaces();
@@ -47,11 +52,6 @@ public class KafkaLogHandler extends Handler {
             e.printStackTrace();
 
         }
-
-        properties.setProperty("bootstrap.servers", "127.0.0.1:9092");
-        properties.setProperty("key.serializer", StringSerializer.class.getName());
-        properties.setProperty("value.serializer", StringSerializer.class.getName());
-        producer = new org.apache.kafka.clients.producer.KafkaProducer<String, Object>(properties);
 
     }
 
@@ -73,11 +73,12 @@ public class KafkaLogHandler extends Handler {
             e.printStackTrace();
         }
         Thread n1 = new Thread(new ThreadKafka(producer,json));
-
         n1.start();
-
-
-
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

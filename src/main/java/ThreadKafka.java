@@ -14,10 +14,17 @@ public class ThreadKafka extends Thread {
 
     @Override
     public void run() {
-        System.out.println(Thread.currentThread().getId()+"test");
 
-        ProducerRecord<String,Object > productRecord = new ProducerRecord<String, Object>("testing2","3",json);
+        ProducerRecord<String,Object > productRecord = new ProducerRecord<String, Object>("testing1","3",json);
         producer.send(productRecord);
         producer.flush();
+
+
+
+
+
+
+
+
     }
 }
