@@ -1,40 +1,29 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.kafka.clients.producer.Producer;
-import org.apache.kafka.clients.producer.ProducerRecord;
-import org.apache.kafka.common.serialization.StringSerializer;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.UnknownHostException;
 import java.util.Enumeration;
-import java.util.Properties;
+import java.util.concurrent.BlockingQueue;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 
-
-
-
-public class KafkaLogHandler extends Handler {
-
+public class KafkaLogHandler extends Handler implements Runnable {
 
     InetAddress addr ;
     String hostname;
-    String IP = "";
-    Producer<String, Object > producer;
-    String json = null;
+    static String IP = "";
+    static String json = null;
 
+    protected BlockingQueue<Object> blockingQueue;
 
+    public KafkaLogHandler(BlockingQueue<Object> queue) {
+        this.blockingQueue = queue;
 
+    }
 
-
-    public KafkaLogHandler(){
-        Properties properties = new Properties();
-        properties.setProperty("bootstrap.servers", "127.0.0.1:9092");
-        properties.setProperty("key.serializer", StringSerializer.class.getName());
-        properties.setProperty("value.serializer", StringSerializer.class.getName());
-        producer = new org.apache.kafka.clients.producer.KafkaProducer<String, Object>(properties);
-
+    public KafkaLogHandler() {
         try {
-
             Enumeration<NetworkInterface> n = NetworkInterface.getNetworkInterfaces();
             while (n.hasMoreElements()) {
                 NetworkInterface e = n.nextElement();
@@ -52,34 +41,41 @@ public class KafkaLogHandler extends Handler {
             e.printStackTrace();
 
         }
-
     }
 
     @Override
     public void publish(LogRecord record) {
-
         try {
+
+            System.out.println(IP);
+            InstanceKafka ik = new InstanceKafka();
             addr = InetAddress.getLocalHost();
             hostname = addr.getHostName();
-            InstanceKafka ik = new InstanceKafka();
             ik.setHostname(hostname);
             ik.setRecord(record);
             ik.setIP(IP);
             ObjectMapper mapper = new ObjectMapper();
             json = mapper.writeValueAsString(ik);
 
-
-        } catch (Exception e) {
+        } catch (UnknownHostException e) {
             e.printStackTrace();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+
         }
-        Thread n1 = new Thread(new ThreadKafka(producer,json));
-        n1.start();
+
+
+    }
+    public void run() {
         try {
-            Thread.sleep(100);
+            System.out.println(json.getClass());
+            blockingQueue.put(json);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
+
+
 
     @Override
     public void flush() {
@@ -90,11 +86,4 @@ public class KafkaLogHandler extends Handler {
     public void close() throws SecurityException {
 
     }
-
-
-
 }
-
-
-
-
